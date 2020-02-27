@@ -44,10 +44,14 @@ namespace Senai.Peoples.WebApi.Controllers
         {
             if (funcionarioRecebido != null)
             {
-            _funcionarioRepository.Adicionar(funcionarioRecebido);
-            return StatusCode(201);
-            }
-            return StatusCode(400);
+                if (funcionarioRecebido.Nome == null)
+                {
+                    return BadRequest("Nome do funcionário obrigatório");
+                }
+                _funcionarioRepository.Adicionar(funcionarioRecebido);
+                return StatusCode(201);
+                }
+                return StatusCode(400);
         }
 
         [HttpPut("{IdAtualizar}")]
