@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Senai.Peoples.WebApi
 {
@@ -17,6 +18,38 @@ namespace Senai.Peoples.WebApi
         {
             services.AddMvc()
             .SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1);
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = "JwtBearer";
+                options.DefaultChallengeScheme = "jwtBearer";
+            })
+           .AddJwtBearer("JwtBearer", options =>
+           {
+               options.TokenValidationParameters = new TokenValidationParameters
+               {
+                    //QUEM ESTÁ SOLICITANDO
+                    ValidateIssuer = true,
+
+                    //QUEM ESTÁ RECEBENDO
+                    ValidateAudience = true,
+
+                    //VALIDA O TEMPO DE EXPERIÇÃO
+                    ValidateLifetime = true,
+
+                    //FORMA DA CRIPTOGRAFIA
+                    IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes("peoples-chave-autenticacao")),
+
+                    //TEMPO DE EXPIRAÇÃO DO TOKEN
+                    ClockSkew = TimeSpan.FromMinutes(30),
+
+                    //NOME DE QUEM ESTÁ EMITINDO
+                    ValidIssuer = "Peoples.WebApi",
+
+                    //NOME DE QUEM VAI RECEBER
+                    ValidAudience = "Peoples.WebApi"
+               };
+           });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -26,6 +59,8 @@ namespace Senai.Peoples.WebApi
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseAuthentication();
 
             app.UseMvc();
         }
